@@ -1,33 +1,33 @@
 const router=require('express').Router();
-const {userRegister,userLogin,userAuth,serializeUser,checkRole}=require('../utils/Auth')
+const {userRegister,userLogin,userAuth,serializeUser,checkRole}=require('../controller/user.controller')
 
 
 
 //Trainee Registration router
 router.post('/trainee-register',async(req,res)=>{
-    await userRegister(req.body,'Trainee',res)
+    await userRegister('Trainee',res,req)
 })
 //EMployee Registration router
 router.post('/employee-register',async(req,res)=>{
-    await userRegister(req.body,'Employee',res)
+    await userRegister('Employee',res,req)
 })
 //Manager Registration router
 router.post('/manager-register',async(req,res)=>{
-    await userRegister(req.body,'Manager',res)
+    await userRegister('Manager',res,req)
 })
 
 
 //Trainee Login router
 router.post('/trainee-login',async(req,res)=>{
-    await userLogin(req.body,'Trainee',res)
+    await userLogin('Trainee',res,res)
 })
 //EMployee login router
 router.post('/employee-login',async(req,res)=>{
-    await userLogin(req.body,'Employee',res)
+    await userLogin('Employee',res,req)
 })
 //Manager login router
 router.post('/manager-login',async(req,res)=>{
-    await userLogin(req.body,'Manager',res)
+    await userLogin(req,'Manager',res)
 })
 
 

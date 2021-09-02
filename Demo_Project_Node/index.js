@@ -15,19 +15,21 @@ const app=express();
 
 //use Middleware
 app.use(cors());
-app.use(body_parser.json());
+app.use(express.json());
 app.use(passport.initialize())
 
 
 require('./middleware/passport')(passport)
 
 //users routes middleware
-app.use('/api/users',require('./routes/users'))
+app.use('/api/users',require('./routes/user.router'))
 
-
+var counter=0;
 const StartApp=async()=>{
     //connect to database
 try {
+    counter++;
+    
     await connect(DB,
         {useUnifiedTopology:true,
         useNewUrlParser:true
@@ -36,6 +38,7 @@ try {
         message:`Successfully connected to Database ${DB}`,
         badge:true
     })
+    console.log(counter);
     app.listen(PORT,()=>{
         success({
             message:`server is running on ${PORT}`,
@@ -47,7 +50,17 @@ try {
         message:`Unable to connect database ${err}`,
         badge:true
     })
+    //StartApp();
+    console.log(counter);
+      if(counter==10){
+        const intervalObj = setTimeout(() => {
+            StartApp();
+          }, 5*60*1000);
+          clearTimeout(intervalObj);
+          counter=0;
+      }
     StartApp();
+    process.exit();
 }
 }
 

@@ -3,26 +3,35 @@ const bcrypt=require('bcryptjs')
 const jwt=require('jsonwebtoken')
 const {SECRET}=require('../config/index')
 const passport=require('passport')
+const {
+  successResponse,
+  errorResponse,
+} = require('../helpers/helpers');
+const {
+  USER_NOT_EXIST,
+  USER_ALREADY_EXIST,
+  UNAUTHORIZED_PORTAL,
+  EMAIL_ALREADY_EXIST,
+  SUCCESSFULLY_REGISTERED,
+  SOMETHING_WENT_WRONG,
+  LOGIN_SUCCESSFULLY,
+  INVALID_UNAME_PWORD
+} = require('../helpers/messages');
 //@DEC to register the user(admin,user,superadmin)
-const userRegister=async(userDetails,employeetype,res)=>{
+const userRegister=async(req,res,employeetype)=>{
     try {
+          var userDetails = req.body
         //validate username
         let userNotTaken=await validateUsername(userDetails.username);
         if(!userNotTaken)
         {
-            return res.status(400).json({
-                message:`Username is already taken`,
-                success:false
-            })
+            return errorResponse(res,req,USER_ALREADY_EXIST,400)
         }
         //validate email
         let emailNotTaken=await validateEmail(userDetails.email);
         if(!emailNotTaken)
         {
-            return res.status(400).json({
-                message:`Email is already registered`,
-                success:false
-            })
+            return errorResponse(req,res,EMAIL_ALREADY_EXIST,400)
         }
 
         //create new user
@@ -33,39 +42,28 @@ const userRegister=async(userDetails,employeetype,res)=>{
         employeetype:employeetype
     });
     await NewUser.save();
-    res.status(201).json({
-        message:`Your account is successfully registered. Please Login`,
-        success:true
-    })
+    return successResponse(req,res,NewUser,SUCCESSFULLY_REGISTERED,200)
         
     } catch (error) {
-        return res.status(500).json({
-            message:'unable to create account',
-            success:false
-        })
+        return errorResponse(req,res,SOMETHING_WENT_WRONG,500)
     }
 
 }
 
 // for login
-const userLogin=async(userCred,employeetype,res)=>{
-    let {username,password}=userCred;
+const userLogin=async(employeetype,res,req)=>{
+    //var userCred = req.body
+    let {username,password}=req.body;
     const user=await User.findOne({username})
     //check username is in database or not
     if(!user)
     {
-        return res.status(404).json({
-            message:'Username is not found Please first Register',
-            success:false
-    })
+        return  errorResponse(req,res,USER_NOT_EXIST,400)
     }
 
     //we will check role
     if(user.employeetype!=employeetype){
-        return res.status(403).json({
-            message:'make sure you are login in right portal',
-            success:false
-    })
+        return errorResponse(req,res,UNAUTHORIZED_PORTAL,400)
 }
 
     //check for password matching
@@ -91,16 +89,9 @@ const userLogin=async(userCred,employeetype,res)=>{
         expiresIn: 168
       };
   
-      return res.status(200).json({
-        ...result,
-        message: "Hurray! You are now logged in.",
-        success: true
-      });
+      return successResponse(req,res,result,LOGIN_SUCCESSFULLY,200);
     } else {
-      return res.status(403).json({
-        message: "Incorrect password.",
-        success: false
-      });
+      return errorResponse(req,res,INVALID_UNAME_PWORD,400)
     }
   };
 
