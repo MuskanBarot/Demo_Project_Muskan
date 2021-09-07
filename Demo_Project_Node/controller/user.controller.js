@@ -3,6 +3,7 @@ const bcrypt=require('bcryptjs')
 const jwt=require('jsonwebtoken')
 const {SECRET}=require('../config/index')
 const passport=require('passport')
+const Report=require('../models/Report')
 const {
   successResponse,
   errorResponse,
@@ -18,7 +19,7 @@ const {
   INVALID_UNAME_PWORD
 } = require('../helpers/messages');
 //@DEC to register the user(admin,user,superadmin)
-const userRegister=async(req,res,employeetype)=>{
+const userRegister=async(employeetype,res,req)=>{
     try {
           var userDetails = req.body
         //validate username
@@ -41,6 +42,27 @@ const userRegister=async(req,res,employeetype)=>{
         password:HashPassword,
         employeetype:employeetype
     });
+    var _id = new User({_id:user._id});
+
+Report.find({}).exec(function(err, collection) {
+    if(collection.length === 0) {
+
+        _id.save(function (err) {
+            if (err) return handleError(err);
+
+            var Report_id = new Report({
+              filepath:filepath,
+              u_id:_id_id
+            });
+
+            Report_id.save(function (err) {
+                if (err) return handleError(err);
+            })
+        })
+
+    }
+})
+    
     await NewUser.save();
     return successResponse(req,res,NewUser,SUCCESSFULLY_REGISTERED,200)
         

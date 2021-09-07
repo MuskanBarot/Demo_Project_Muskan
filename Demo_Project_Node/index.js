@@ -14,7 +14,14 @@ const app=express();
 
 
 //use Middleware
-app.use(cors());
+global.__basedir = __dirname;
+
+var corsOptions = {
+  origin: "http://localhost:8081"
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(passport.initialize())
 
@@ -23,6 +30,7 @@ require('./middleware/passport')(passport)
 
 //users routes middleware
 app.use('/api/users',require('./routes/user.router'))
+app.use('/api/users',require('./routes/report.router'))
 
 var counter=0;
 const StartApp=async()=>{
